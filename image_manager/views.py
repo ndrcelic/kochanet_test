@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate
+from django.db.models import Q
 from rest_framework import viewsets, status, generics
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import GenericAPIView
@@ -60,6 +61,9 @@ class ImageViewSet(viewsets.ModelViewSet):
     serializer_class = ImageSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return Image.objects.filter(Q(user=self.request.user) | Q(shared_with=self.request.user))
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -73,11 +77,11 @@ class ImageViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def share_with_friend(self, request, pk=None):
         image = self.get_object()
-        user_to_share = request.data.get('user_id')
-        try:
-            user = User.objects.get(id=user_to_share)
-            image.share_with_friend.add(user)
-            image.save()
-            return Response({"message": "Image shared with friend"})
-        except User.DoesNotExist:
-            return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        user_ids = request.data.get('shared_with', [])
+        users = User.objects.filter(id__in=user_ids).exclude(id=request.user.id)
+
+        if not users:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        image.shared_with.set(users)
+        return Response({"message": "Image was successfully shared"}, status=status.HTTP_200_OK)
