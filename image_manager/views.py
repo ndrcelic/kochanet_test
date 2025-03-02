@@ -22,7 +22,7 @@ class RegisterAPIView(GenericAPIView):
         data = serializer.data
         data['token'] = {
            'access_token': str(token.access_token),
-           'refresh_token': str(token.refresh_token)
+           'refresh_token': str(token)
         }
         return Response(data, status=status.HTTP_201_CREATED)
 
@@ -39,7 +39,7 @@ class LoginAPIView(GenericAPIView):
         data = serializer.data
         data['token'] = {
             'access_token': str(token.access_token),
-            'refresh_token': str(token.refresh_token)
+            'refresh_token': str(token)
         }
         return Response(data, status=status.HTTP_200_OK)
 
