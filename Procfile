@@ -1,1 +1,1 @@
-web: gunicorn Kochanet.wsgi
+web: python manage.py migrate && gunicorn Kochanet.wsgi
