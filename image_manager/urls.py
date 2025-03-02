@@ -12,4 +12,5 @@ urlpatterns = [
     path('logout/', LogoutAPIView.as_view(), name='logout'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
     path('share/', ImageViewSet.as_view({'post': 'share_with_friend'}), name='share'),
+    path('', include(router.urls)),
 ]
